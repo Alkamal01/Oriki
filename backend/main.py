@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import json
+import os
 from datetime import datetime
 
 from agents.ingestion_agent import IngestionAgent
 from agents.symbolic_encoder import SymbolicEncoder
 from agents.reasoning_engine import ReasoningEngine
 from agents.neural_translator import NeuralTranslator
+from agents.fetchai_orchestrator import FetchAIOrchestrator
 from storage.ipfs_client import IPFSClient
 from storage.database import Database
 
@@ -26,10 +28,19 @@ app.add_middleware(
 # Initialize components
 db = Database()
 ipfs_client = IPFSClient()
-ingestion_agent = IngestionAgent()
-symbolic_encoder = SymbolicEncoder()
-reasoning_engine = ReasoningEngine()
-neural_translator = NeuralTranslator()
+
+# Option to use Fetch.ai decentralized agents or direct agents
+USE_FETCHAI = os.getenv("USE_FETCHAI", "true").lower() == "true"
+
+if USE_FETCHAI:
+    # Use Fetch.ai orchestrator for true decentralized multi-agent system
+    fetchai_orchestrator = FetchAIOrchestrator()
+else:
+    # Use direct agents (fallback)
+    ingestion_agent = IngestionAgent()
+    symbolic_encoder = SymbolicEncoder()
+    reasoning_engine = ReasoningEngine()
+    neural_translator = NeuralTranslator()
 
 # Pydantic models
 class KnowledgeInput(BaseModel):
@@ -71,13 +82,17 @@ async def root():
 async def ingest_knowledge(knowledge: KnowledgeInput):
     """Ingest cultural knowledge into the system"""
     try:
-        # Step 1: Process through ingestion agent
-        processed = await ingestion_agent.process(knowledge.dict())
+        if USE_FETCHAI:
+            # Use Fetch.ai decentralized agent orchestration
+            result = await fetchai_orchestrator.process_knowledge_ingestion(knowledge.dict())
+            processed = result["processed_data"]
+            symbolic = result["symbolic_representation"]
+        else:
+            # Use direct agents
+            processed = await ingestion_agent.process(knowledge.dict())
+            symbolic = await symbolic_encoder.encode(processed)
         
-        # Step 2: Encode to symbolic representation (MeTTa)
-        symbolic = await symbolic_encoder.encode(processed)
-        
-        # Step 3: Store in IPFS
+        # Store in IPFS
         ipfs_hash = await ipfs_client.add_json({
             "content": knowledge.content,
             "culture": knowledge.culture,
@@ -85,7 +100,7 @@ async def ingest_knowledge(knowledge: KnowledgeInput):
             "timestamp": datetime.utcnow().isoformat()
         })
         
-        # Step 4: Store metadata in database
+        # Store metadata in database
         knowledge_id = await db.store_knowledge({
             **knowledge.dict(),
             "symbolic_representation": symbolic,
@@ -109,28 +124,39 @@ async def ingest_knowledge(knowledge: KnowledgeInput):
 async def query_knowledge(query: QueryInput):
     """Query the cultural knowledge base with reasoning"""
     try:
-        # Step 1: Retrieve relevant knowledge from database
+        # Retrieve relevant knowledge from database
         relevant_knowledge = await db.query_knowledge(query.question)
         
-        # Step 2: Perform symbolic reasoning with MeTTa
-        reasoning_result = await reasoning_engine.reason(
-            query.question,
-            relevant_knowledge
-        )
-        
-        # Step 3: Translate to natural language
-        natural_response = await neural_translator.translate(
-            reasoning_result,
-            query.question
-        )
-        
-        return ReasoningResponse(
-            question=query.question,
-            answer=natural_response["answer"],
-            reasoning_chain=reasoning_result["chain"],
-            cultural_context=natural_response["cultural_context"],
-            sources=natural_response["sources"]
-        )
+        if USE_FETCHAI:
+            # Use Fetch.ai decentralized agent orchestration
+            result = await fetchai_orchestrator.process_query(
+                query.question,
+                relevant_knowledge
+            )
+            return ReasoningResponse(
+                question=query.question,
+                answer=result["answer"],
+                reasoning_chain=result["reasoning_chain"],
+                cultural_context=result["cultural_context"],
+                sources=result["sources"]
+            )
+        else:
+            # Use direct agents
+            reasoning_result = await reasoning_engine.reason(
+                query.question,
+                relevant_knowledge
+            )
+            natural_response = await neural_translator.translate(
+                reasoning_result,
+                query.question
+            )
+            return ReasoningResponse(
+                question=query.question,
+                answer=natural_response["answer"],
+                reasoning_chain=reasoning_result["chain"],
+                cultural_context=natural_response["cultural_context"],
+                sources=natural_response["sources"]
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -169,12 +195,33 @@ async def list_cultures():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/agents/status")
+async def get_agent_status():
+    """Get status of all agents in the network"""
+    try:
+        if USE_FETCHAI:
+            return await fetchai_orchestrator.get_agent_status()
+        else:
+            return {
+                "mode": "direct",
+                "agents": {
+                    "ingestion": {"status": "active", "type": "direct"},
+                    "encoder": {"status": "active", "type": "direct"},
+                    "reasoning": {"status": "active", "type": "direct"},
+                    "translator": {"status": "active", "type": "direct"}
+                }
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    agent_mode = "fetchai_decentralized" if USE_FETCHAI else "direct"
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
+        "agent_mode": agent_mode,
         "services": {
             "database": await db.check_health(),
             "ipfs": await ipfs_client.check_health()

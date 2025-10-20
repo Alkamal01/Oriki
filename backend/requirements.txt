@@ -10,3 +10,5 @@ httpx
 openai
 aiofiles
 alembic
+uagents
+cosmpy

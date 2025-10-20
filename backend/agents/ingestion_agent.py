@@ -1,6 +1,6 @@
 """
 Ingestion Agent - Processes and validates cultural knowledge input
-Uses OpenAI for intelligent keyword extraction
+Uses ASI Cloud (CUDOS) for intelligent keyword extraction
 """
 import re
 import os
@@ -10,11 +10,16 @@ import openai
 class IngestionAgent:
     def __init__(self):
         self.categories = ["proverb", "story", "ritual", "medicine", "governance", "ethics"]
-        self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
-        self.use_openai = bool(self.openai_api_key)
+        self.asi_api_key = os.getenv("ASI_API_KEY", "")
+        self.asi_base_url = os.getenv("ASI_BASE_URL", "https://inference.asicloud.cudos.org/v1")
+        self.asi_model = os.getenv("ASI_MODEL", "qwen/qwen3-32b")
+        self.use_asi = bool(self.asi_api_key)
         
-        if self.use_openai:
-            openai.api_key = self.openai_api_key
+        if self.use_asi:
+            self.client = openai.OpenAI(
+                api_key=self.asi_api_key,
+                base_url=self.asi_base_url
+            )
         
     async def process(self, knowledge: Dict[str, Any]) -> Dict[str, Any]:
         """Process incoming cultural knowledge"""
@@ -45,11 +50,11 @@ class IngestionAgent:
         }
     
     async def _extract_concepts(self, content: str) -> List[str]:
-        """Extract key concepts from content using OpenAI"""
-        if self.use_openai:
+        """Extract key concepts from content using ASI Cloud"""
+        if self.use_asi:
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
+                response = self.client.chat.completions.create(
+                    model=self.asi_model,
                     messages=[
                         {
                             "role": "system",
@@ -73,7 +78,7 @@ Key Concepts:"""
                 return concepts[:7]  # Limit to 7 concepts
                 
             except Exception as e:
-                print(f"OpenAI extraction failed, using fallback: {e}")
+                print(f"ASI Cloud extraction failed, using fallback: {e}")
                 return self._extract_concepts_fallback(content)
         else:
             return self._extract_concepts_fallback(content)
@@ -111,11 +116,11 @@ Key Concepts:"""
         return themes
     
     async def _extract_entities(self, content: str) -> Dict[str, List[str]]:
-        """Extract entities using OpenAI"""
-        if self.use_openai:
+        """Extract entities using ASI Cloud"""
+        if self.use_asi:
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
+                response = self.client.chat.completions.create(
+                    model=self.asi_model,
                     messages=[
                         {
                             "role": "system",
@@ -145,7 +150,7 @@ Cultural Knowledge: {content}"""
                 return entities
                 
             except Exception as e:
-                print(f"OpenAI entity extraction failed, using fallback: {e}")
+                print(f"ASI Cloud entity extraction failed, using fallback: {e}")
                 return self._extract_entities_fallback(content)
         else:
             return self._extract_entities_fallback(content)

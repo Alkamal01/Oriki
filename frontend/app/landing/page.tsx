@@ -187,8 +187,8 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
-        <div className="container mx-auto px-6">
+      <section id="features" className="py-20 bg-gradient-to-b from-white to-oriki-beige/30">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-oriki-brown">
               Revolutionary Features
@@ -198,17 +198,27 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-oriki-beige p-8 rounded-2xl border-2 border-oriki-brown/20 hover:border-oriki-brown hover:shadow-xl transition-all">
-              <div className="w-16 h-16 bg-oriki-brown/10 rounded-xl flex items-center justify-center mb-6">
-                <span className="text-3xl">🧠</span>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 - Symbolic Reasoning */}
+            <div className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-oriki-brown/10 hover:border-oriki-gold/50">
+              <div className="relative h-56 overflow-hidden bg-gradient-to-br from-oriki-brown/20 to-oriki-gold/20">
+                <img 
+                  src="/features/feature-symbolic.jpg" 
+                  alt="Symbolic Reasoning"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23E9E1D2" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%238B653A"%3ESymbolic Reasoning%3C/text%3E%3C/svg%3E'
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-oriki-brown">Symbolic Reasoning</h3>
-              <p className="text-oriki-charcoal/80 leading-relaxed">
-                MeTTa-powered symbolic encoding creates transparent, explainable reasoning chains.
-                Every inference is traceable and verifiable.
-              </p>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3 text-oriki-brown">Symbolic Reasoning</h3>
+                <p className="text-oriki-charcoal/80 leading-relaxed">
+                  MeTTa-powered symbolic encoding creates transparent, explainable reasoning chains.
+                  Every inference is traceable and verifiable.
+                </p>
+              </div>
             </div>
 
             {/* Feature 2 */}

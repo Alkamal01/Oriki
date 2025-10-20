@@ -1,13 +1,22 @@
 """
-Neural Translator - Converts symbolic reasoning to natural language using LLM
+Neural Translator - Converts symbolic reasoning to natural language using ASI Cloud LLM
 """
 from typing import Dict, Any, List
 import os
+import openai
 
 class NeuralTranslator:
     def __init__(self):
-        self.api_key = os.getenv("OPENAI_API_KEY", "")
-        self.use_llm = bool(self.api_key)
+        self.asi_api_key = os.getenv("ASI_API_KEY", "")
+        self.asi_base_url = os.getenv("ASI_BASE_URL", "https://inference.asicloud.cudos.org/v1")
+        self.asi_model = os.getenv("ASI_MODEL", "qwen/qwen3-32b")
+        self.use_llm = bool(self.asi_api_key)
+        
+        if self.use_llm:
+            self.client = openai.OpenAI(
+                api_key=self.asi_api_key,
+                base_url=self.asi_base_url
+            )
         
     async def translate(self, reasoning_result: Dict[str, Any], question: str) -> Dict[str, Any]:
         """Translate symbolic reasoning to natural language"""
