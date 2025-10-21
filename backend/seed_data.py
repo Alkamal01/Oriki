@@ -72,5 +72,33 @@ SEED_KNOWLEDGE = [
         "category": "ethics",
         "source": "Ancient Indian philosophy",
         "language": "en"
+    },
+    {
+        "content": "Gaskiya ta fi karfi: Truth is stronger than power. This Hausa proverb teaches that honesty and integrity ultimately prevail over force and deception. A society built on truth endures.",
+        "culture": "Hausa (Nigeria/Niger)",
+        "category": "proverb",
+        "source": "Hausa oral tradition",
+        "language": "en"
+    },
+    {
+        "content": "Kowa ya san inda takalminsa yake masa ciwo: Everyone knows where their shoe pinches. This Hausa wisdom teaches empathy - only the person experiencing hardship truly understands their pain. We must listen to those affected before judging.",
+        "culture": "Hausa (Nigeria/Niger)",
+        "category": "proverb",
+        "source": "Hausa oral tradition",
+        "language": "en"
+    },
+    {
+        "content": "Mutunci: Human dignity and respect. This core Hausa value emphasizes treating all people with honor regardless of status. True nobility comes from character, not wealth or position.",
+        "culture": "Hausa (Nigeria/Niger)",
+        "category": "ethics",
+        "source": "Hausa cultural values",
+        "language": "en"
+    },
+    {
+        "content": "Zaman lafiya: Living in peace. This Hausa concept emphasizes harmony, reconciliation, and peaceful coexistence. Communities thrive when conflicts are resolved through dialogue and mutual understanding.",
+        "culture": "Hausa (Nigeria/Niger)",
+        "category": "governance",
+        "source": "Hausa social philosophy",
+        "language": "en"
     }
 ]

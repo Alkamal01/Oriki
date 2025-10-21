@@ -46,7 +46,7 @@ class ReasoningEngine:
         })
         
         # Step 4: Synthesize conclusion
-        conclusion = self._synthesize_conclusion(inferences, intent)
+        conclusion = self._synthesize_conclusion(inferences, intent, relevant)
         reasoning_chain.append({
             "step": 4,
             "action": "synthesize_conclusion",
@@ -96,6 +96,11 @@ class ReasoningEngine:
     
     def _find_relevant_knowledge(self, intent: Dict, knowledge_entries: List[Dict]) -> List[Dict]:
         """Find knowledge entries relevant to the intent"""
+        # If database already scored entries, use those
+        if knowledge_entries and knowledge_entries[0].get("relevance_score", 0) > 0:
+            return knowledge_entries[:5]  # Top 5 from database
+        
+        # Otherwise, score them here
         relevant = []
         
         for entry in knowledge_entries:
@@ -130,16 +135,37 @@ class ReasoningEngine:
         patterns = []
         
         for entry in knowledge_entries:
+            # First priority: use AI-extracted patterns from ingestion
+            entry_patterns = entry.get("patterns", [])
+            if entry_patterns:
+                patterns.extend(entry_patterns)
+                print(f"   Using AI-extracted patterns: {entry_patterns}")
+            
             themes = entry.get("themes", [])
             concepts = entry.get("concepts", [])
+            culture = entry.get("culture", "")
+            content = entry.get("content", "")
+            
+            # Fallback: Extract key concepts from content
+            if "peace" in content.lower() or "harmony" in content.lower():
+                patterns.append(f"{culture}: peace_and_harmony_principle")
+            
+            if "community" in content.lower() or "collective" in content.lower():
+                patterns.append(f"{culture}: community_first_principle")
+            
+            if "truth" in content.lower() or "honesty" in content.lower():
+                patterns.append(f"{culture}: truth_and_integrity_principle")
+            
+            if "respect" in content.lower() or "dignity" in content.lower():
+                patterns.append(f"{culture}: human_dignity_principle")
             
             # Pattern: If theme X, then principle Y
             if "collective_good" in themes:
-                patterns.append("collective_good → community_first_principle")
+                patterns.append("collective_good")
             if "ethics" in themes and "fairness" in concepts:
-                patterns.append("ethics + fairness → justice_through_community")
+                patterns.append("ethics")
             if "wisdom" in themes:
-                patterns.append("wisdom → ancestral_knowledge_principle")
+                patterns.append("wisdom")
         
         return list(set(patterns))  # Remove duplicates
     
@@ -147,32 +173,63 @@ class ReasoningEngine:
         """Apply reasoning rules to generate inferences"""
         inferences = []
         
+        # Map patterns to philosophical insights
+        pattern_insights = {
+            "humility": "Humility reminds us that no matter how far we travel or how much we achieve, we remain connected to our origins and roots",
+            "collective_good": "Individual wellbeing is interconnected with collective prosperity",
+            "wisdom_transmission": "Ancestral knowledge provides time-tested principles passed down through generations",
+            "ethics": "Moral principles guide us toward justice and fairness in our communities",
+            "reciprocity": "What we give to others returns to us; mutual exchange strengthens bonds",
+            "resilience": "Strength comes from enduring challenges and learning from adversity",
+            "truth_integrity": "Truth and integrity form the foundation of lasting relationships and societies",
+            "human_dignity": "Respect for human dignity transcends social status and material wealth",
+            "unity_diversity": "Strength emerges from unity while celebrating our differences",
+            "nature_harmony": "Balance with the natural world sustains both humanity and the earth",
+            "spirituality": "Connection to ancestors and the divine provides guidance and meaning",
+            "respect_hierarchy": "Honoring elders and wisdom-keepers preserves cultural knowledge"
+        }
+        
         for pattern in patterns:
-            if "collective_good" in pattern and intent["type"] == "ethical":
-                inferences.append(
-                    "Fairness is achieved through prioritizing collective well-being over individual gain"
-                )
-            if "ethics" in pattern and "fairness" in intent["concepts"]:
-                inferences.append(
-                    "Justice emerges from community consensus and shared responsibility"
-                )
-            if "wisdom" in pattern:
-                inferences.append(
-                    "Ancestral knowledge provides time-tested principles for ethical decision-making"
-                )
+            # Check if we have a direct mapping
+            for key, insight in pattern_insights.items():
+                if key in pattern.lower():
+                    inferences.append(insight)
+                    break
+            
+            # Legacy pattern matching
+            if "peace_and_harmony" in pattern:
+                inferences.append("Peace and harmony are achieved through mutual understanding and reconciliation")
+            if "community_first" in pattern:
+                inferences.append("Individual wellbeing is interconnected with collective prosperity")
         
-        # Add general inference if specific ones not found
-        if not inferences:
-            inferences.append(
-                "Cultural wisdom emphasizes interconnectedness and collective responsibility"
-            )
-        
-        return inferences
+        return list(set(inferences))  # Remove duplicates
     
-    def _synthesize_conclusion(self, inferences: List[str], intent: Dict) -> Dict[str, Any]:
+    def _synthesize_conclusion(self, inferences: List[str], intent: Dict, relevant_knowledge: List[Dict] = None) -> Dict[str, Any]:
         """Synthesize final conclusion from inferences"""
+        if not inferences:
+            # If no pattern-based inferences but we have relevant knowledge, use the content directly
+            if relevant_knowledge and len(relevant_knowledge) > 0:
+                top_entry = relevant_knowledge[0]
+                content = top_entry.get("content", "")
+                culture = top_entry.get("culture", "Unknown")
+                
+                if content:
+                    return {
+                        "primary_insight": f"According to {culture} wisdom: {content}",
+                        "supporting_insights": [],
+                        "reasoning_type": "direct_knowledge",
+                        "confidence": "high"
+                    }
+            
+            return {
+                "primary_insight": None,
+                "supporting_insights": [],
+                "reasoning_type": intent["type"],
+                "confidence": "none"
+            }
+        
         return {
-            "primary_insight": inferences[0] if inferences else "No specific insight generated",
+            "primary_insight": inferences[0],
             "supporting_insights": inferences[1:] if len(inferences) > 1 else [],
             "reasoning_type": intent["type"],
             "confidence": "high" if len(inferences) >= 2 else "medium"

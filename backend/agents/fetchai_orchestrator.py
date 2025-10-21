@@ -7,7 +7,7 @@ from uagents.setup import fund_agent_if_low
 from typing import Dict, Any, List, Optional
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 
@@ -133,7 +133,7 @@ class FetchAIOrchestrator:
                 request_id=msg.request_id,
                 processed_data=processed,
                 status="success",
-                timestamp=datetime.utcnow().isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat()
             )
             await ctx.send(sender, response)
         
@@ -268,12 +268,12 @@ class FetchAIOrchestrator:
         """
         Orchestrate the full knowledge ingestion pipeline using decentralized agents
         """
-        request_id = f"ingest_{datetime.utcnow().timestamp()}"
+        request_id = f"ingest_{datetime.now(timezone.utc).timestamp()}"
         
         # Initialize request tracking
         self.pending_requests[request_id] = {
             "status": "pending",
-            "started_at": datetime.utcnow().isoformat()
+            "started_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Send to ingestion agent
@@ -304,16 +304,16 @@ class FetchAIOrchestrator:
             "status": "completed"
         }
     
-    async def process_query(self, question: str, knowledge_context: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def process_query(self, question: str, knowledge_context: List[Dict[str, Any]], web_fallback: Dict = None) -> Dict[str, Any]:
         """
         Orchestrate the query processing pipeline using decentralized agents
         """
-        request_id = f"query_{datetime.utcnow().timestamp()}"
+        request_id = f"query_{datetime.now(timezone.utc).timestamp()}"
         
         # Initialize request tracking
         self.pending_requests[request_id] = {
             "status": "pending",
-            "started_at": datetime.utcnow().isoformat()
+            "started_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Process through reasoning and translation agents
@@ -324,7 +324,7 @@ class FetchAIOrchestrator:
         translator = NeuralTranslator()
         
         reasoning_result = await reasoning.reason(question, knowledge_context)
-        translation_result = await translator.translate(reasoning_result, question)
+        translation_result = await translator.translate(reasoning_result, question, web_fallback=web_fallback)
         
         return {
             "request_id": request_id,

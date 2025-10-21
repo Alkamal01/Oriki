@@ -8,7 +8,7 @@ from agents.ingestion_agent import IngestionAgent
 from agents.symbolic_encoder import SymbolicEncoder
 from storage.database import Database
 from storage.ipfs_client import IPFSClient
-from datetime import datetime
+from datetime import datetime, timezone
 
 async def seed_database():
     """Seed database with example knowledge"""
@@ -37,7 +37,7 @@ async def seed_database():
                 "content": knowledge["content"],
                 "culture": knowledge["culture"],
                 "symbolic": symbolic,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
             print(f"  ✓ Stored in IPFS: {ipfs_hash[:20]}...")
             
@@ -54,8 +54,9 @@ async def seed_database():
             print(f"  ✗ Error processing entry: {e}")
             continue
     
-    print(f"\n✅ Successfully seeded {len(db.knowledge_store)} knowledge entries")
-    print(f"📚 Cultures represented: {', '.join(await db.get_cultures())}")
+    print(f"\n✅ Successfully seeded {len(SEED_KNOWLEDGE)} knowledge entries")
+    cultures = await db.get_cultures()
+    print(f"📚 Cultures represented: {', '.join(cultures)}")
     
     return db
 

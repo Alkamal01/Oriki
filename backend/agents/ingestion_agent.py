@@ -33,6 +33,9 @@ class IngestionAgent:
         # Extract entities (people, places, values)
         entities = await self._extract_entities(knowledge["content"])
         
+        # Extract reasoning patterns for better inference
+        patterns = await self._extract_reasoning_patterns(knowledge["content"], knowledge["category"])
+        
         # Validate cultural context
         validated = self._validate_context(knowledge)
         
@@ -41,6 +44,7 @@ class IngestionAgent:
             "concepts": concepts,
             "themes": themes,
             "entities": entities,
+            "patterns": patterns,
             "validated": validated,
             "metadata": {
                 "word_count": len(knowledge["content"].split()),
@@ -197,6 +201,91 @@ Cultural Knowledge: {content}"""
                 entities["actions"].append(action)
         
         return entities
+    
+    async def _extract_reasoning_patterns(self, content: str, category: str) -> List[str]:
+        """Extract reasoning patterns that can be used for inference"""
+        if self.use_asi:
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.asi_model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are an expert in cultural wisdom and philosophical reasoning. Identify the underlying patterns and principles."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"""Analyze this {category} and identify the underlying reasoning patterns or principles it teaches.
+
+Choose from these pattern types (select all that apply):
+- collective_good (prioritizing community over individual)
+- wisdom_transmission (passing knowledge across generations)
+- ethics (moral principles and values)
+- nature_harmony (balance with natural world)
+- spirituality (connection to ancestors/divine)
+- reciprocity (mutual exchange and fairness)
+- respect_hierarchy (honoring elders/authority)
+- unity_diversity (strength in togetherness)
+- resilience (overcoming adversity)
+- humility (recognizing limitations)
+- truth_integrity (honesty and authenticity)
+- human_dignity (inherent worth of all people)
+
+Cultural Knowledge: {content}
+
+Return ONLY the pattern names as a comma-separated list. Example: "collective_good, wisdom_transmission, humility"
+
+Patterns:"""
+                        }
+                    ],
+                    max_tokens=100,
+                    temperature=0.3
+                )
+                
+                patterns_text = response.choices[0].message.content.strip()
+                patterns = [p.strip().lower() for p in patterns_text.split(',') if p.strip()]
+                
+                # Validate patterns against known types
+                valid_patterns = [
+                    "collective_good", "wisdom_transmission", "ethics", "nature_harmony",
+                    "spirituality", "reciprocity", "respect_hierarchy", "unity_diversity",
+                    "resilience", "humility", "truth_integrity", "human_dignity"
+                ]
+                
+                return [p for p in patterns if p in valid_patterns]
+                
+            except Exception as e:
+                print(f"ASI Cloud pattern extraction failed, using fallback: {e}")
+                return self._extract_patterns_fallback(content, category)
+        else:
+            return self._extract_patterns_fallback(content, category)
+    
+    def _extract_patterns_fallback(self, content: str, category: str) -> List[str]:
+        """Fallback pattern extraction using keyword matching"""
+        patterns = []
+        content_lower = content.lower()
+        
+        pattern_keywords = {
+            "collective_good": ["community", "together", "we", "collective", "shared"],
+            "wisdom_transmission": ["ancestor", "elder", "teach", "learn", "tradition"],
+            "ethics": ["right", "wrong", "moral", "virtue", "honor", "just"],
+            "humility": ["humble", "modest", "return", "origin", "home"],
+            "reciprocity": ["give", "receive", "exchange", "mutual", "share"],
+            "resilience": ["overcome", "endure", "persist", "strength", "survive"],
+            "truth_integrity": ["truth", "honest", "authentic", "genuine", "real"],
+            "human_dignity": ["respect", "dignity", "worth", "value", "honor"]
+        }
+        
+        for pattern, keywords in pattern_keywords.items():
+            if any(keyword in content_lower for keyword in keywords):
+                patterns.append(pattern)
+        
+        # If it's a proverb and mentions returning/home, likely about humility
+        if category == "proverb" and any(word in content_lower for word in ["return", "home", "origin"]):
+            if "humility" not in patterns:
+                patterns.append("humility")
+        
+        return patterns
     
     def _validate_context(self, knowledge: Dict[str, Any]) -> bool:
         """Validate that the knowledge has proper context"""

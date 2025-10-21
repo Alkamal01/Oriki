@@ -74,10 +74,11 @@ Oríkì bridges ancestral wisdom with modern AI to create more **inclusive**, **
 
 ## 🛠️ Tech Stack
 
-### ASI Alliance Integration
+### ASI Alliance Integration (Full Stack!)
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
+| **🤖 Multi-Agent System** | **Fetch.ai (uAgents)** | **Decentralized agent orchestration** |
 | **Symbolic Reasoning** | MeTTa | Knowledge representation & inference |
 | **Agent Orchestration** | Fetch.ai Agentverse | Multi-agent coordination |
 | **Neural Processing** | OpenAI API | Natural language understanding |
@@ -92,41 +93,194 @@ Oríkì bridges ancestral wisdom with modern AI to create more **inclusive**, **
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.9+
-- Node.js 18+
-- npm or yarn
 
-### Installation
+Before you begin, ensure you have the following installed:
+- **Python 3.9+** ([Download](https://www.python.org/downloads/))
+- **Node.js 18+** ([Download](https://nodejs.org/))
+- **npm** or **yarn** (comes with Node.js)
+- **Git** ([Download](https://git-scm.com/downloads))
+
+### 1. Clone the Repository
 
 ```bash
-# Clone repository
-git clone <repository-url>
-cd oriki
-
-# Backend setup
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python seed_database.py
-
-# Start backend
-python -m uvicorn main:app --reload
+git clone https://github.com/Alkamal01/Oriki.git
+cd Oriki
 ```
 
-In a new terminal:
-```bash
-# Frontend setup
-cd frontend
-npm install
+### 2. Backend Setup
 
-# Start frontend
+#### Install Dependencies
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
+
+# Install Python packages
+pip install -r requirements.txt
+```
+
+#### Configure Environment Variables
+
+Create a `.env` file in the `backend` directory:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your API keys:
+
+```env
+# Database (SQLite for local development)
+DATABASE_URL=sqlite:///./oriki.db
+
+# ASI Cloud API (CUDOS) - Required for AI features
+ASI_API_KEY=your_asi_api_key_here
+ASI_BASE_URL=https://inference.asicloud.cudos.org/v1
+ASI_MODEL=qwen/qwen3-32b
+
+# OpenAI API - Required for multimodal features
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Tavily API - Optional, for web search enrichment
+TAVILY_API_KEY=your_tavily_api_key_here
+
+# Fetch.ai - Optional, for decentralized agents
+FETCH_AI_API_KEY=your_fetchai_api_key_here
+
+# IPFS - Optional, uses local node by default
+IPFS_API_URL=/ip4/127.0.0.1/tcp/5001
+```
+
+**Get API Keys:**
+- **ASI Cloud**: [https://inference.asicloud.cudos.org](https://inference.asicloud.cudos.org)
+- **OpenAI**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+- **Tavily**: [https://tavily.com](https://tavily.com)
+- **Fetch.ai**: [https://fetch.ai](https://fetch.ai)
+
+#### Initialize Database
+
+```bash
+# Seed the database with example cultural knowledge
+python seed_database.py
+```
+
+#### Start Backend Server
+
+```bash
+# Run with uvicorn
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The backend API will be available at `http://localhost:8000`
+
+### 3. Frontend Setup
+
+Open a **new terminal** window:
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+# or
+yarn install
+
+# Create environment file
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+```
+
+#### Start Frontend Development Server
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+The frontend will be available at `http://localhost:3000` 🎉
+
+### 4. Verify Installation
+
+1. Open your browser to `http://localhost:3000`
+2. You should see the Oríkì landing page
+3. Click "Enter App" to access the main interface
+4. Try querying: "What can African proverbs teach about community?"
+
+### 🐛 Troubleshooting
+
+#### Backend Issues
+
+**Port already in use:**
+```bash
+# Use a different port
+python -m uvicorn main:app --reload --port 8001
+```
+
+**Database errors:**
+```bash
+# Delete and recreate database
+rm oriki.db
+python seed_database.py
+```
+
+**Missing dependencies:**
+```bash
+pip install --upgrade -r requirements.txt
+```
+
+#### Frontend Issues
+
+**Port 3000 in use:**
+```bash
+# Next.js will automatically use port 3001
 npm run dev
 ```
 
-Visit `http://localhost:3000` 🎉
+**Module not found:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
 
-**Detailed instructions**: See [QUICKSTART.md](QUICKSTART.md)
+**API connection errors:**
+- Ensure backend is running on `http://localhost:8000`
+- Check `.env.local` has correct `NEXT_PUBLIC_API_URL`
+
+### 📦 Production Build
+
+#### Backend
+
+```bash
+cd backend
+pip install gunicorn
+gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+
+#### Frontend
+
+```bash
+cd frontend
+npm run build
+npm start
+```
+
+### 🐳 Docker Setup (Optional)
+
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+
+# Access at http://localhost:3000
+```
 
 ---
 
@@ -166,6 +320,15 @@ Visit `http://localhost:3000` 🎉
 ---
 
 ## 🌟 Key Features
+
+### 🤖 Decentralized Multi-Agent System (NEW!)
+**True decentralized AI orchestration using Fetch.ai:**
+- 5 autonomous agents communicating via Fetch.ai protocol
+- Orchestrator coordinates knowledge processing pipeline
+- Specialized agents for ingestion, encoding, reasoning, and translation
+- Transparent agent-to-agent communication
+- Scalable across multiple nodes
+- **Full ASI Alliance integration!**
 
 ### 1. 📥 Knowledge Ingestion
 Upload cultural content and automatically extract:
@@ -249,13 +412,16 @@ ethics + fairness → justice_through_community
 
 | Document | Description |
 |----------|-------------|
-| [QUICKSTART.md](QUICKSTART.md) | Installation and setup guide |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture details |
-| [METTA_EXAMPLES.md](METTA_EXAMPLES.md) | MeTTa encoding examples |
-| [DEMO_STORY.md](DEMO_STORY.md) | 1-minute presentation script |
-| [FUTURE_VISION.md](FUTURE_VISION.md) | Roadmap and scalability |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Production deployment guide |
-| [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) | Complete project overview |
+| [README.md](README.md) | This file - complete project overview |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Detailed system architecture and design |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Production deployment guide (Vercel + Render) |
+| [LICENSE](LICENSE) | MIT License details |
+
+### API Documentation
+
+Once the backend is running, visit:
+- **Local**: `http://localhost:8000/docs`
+- **Production**: `https://your-backend.onrender.com/docs`
 
 ---
 
@@ -313,25 +479,51 @@ We welcome contributions from:
 
 ## 🗺️ Roadmap
 
-### Phase 1 (Months 1-3)
-- ✅ Core architecture
-- ✅ Demo functional
-- ⏳ Community feedback
-- ⏳ Initial partnerships
+### Phase 1 (Hackathon - COMPLETED! ✅)
+- ✅ Core architecture with multi-agent system
+- ✅ Full ASI Alliance stack integration (Fetch.ai + CUDOS + MeTTa)
+- ✅ Demo functional with 14+ knowledge entries
+- ✅ 10+ cultures represented (African, Indian, Turkish, Indigenous)
+- ✅ Real IPFS integration (content-addressed storage)
+- ✅ AI-powered semantic search
+- ✅ Interactive knowledge graph visualization
+- ✅ Cultural wisdom comparison tool
+- ✅ Transparent reasoning visualization
+- ✅ **Multi-modal AI processing** (Audio + Image + Text)
+- ✅ **Audio recording and transcription** for oral traditions
+- ✅ **Image analysis** for cultural symbols and artifacts
+- ✅ **Multi-modal synthesis** combining all formats
+- ✅ Professional UI/UX with brand consistency
+- ✅ PostgreSQL/SQLite database with symbolic encoding
+- ✅ Decentralized agent orchestration
 
-### Phase 2 (Months 4-6)
-- ⏳ 100+ knowledge entries
-- ⏳ 20+ cultures
-- ⏳ Real IPFS integration
-- ⏳ Mobile app
+### Phase 2 (Post-Hackathon: Months 1-3)
+- ⏳ Community feedback and iteration
+- ⏳ 100+ knowledge entries from community contributions
+- ⏳ 20+ cultures with deeper representation
+- ⏳ Initial partnerships with cultural organizations
+- ⏳ Voice input for native languages
+- ⏳ Enhanced mobile responsiveness
 
-### Phase 3 (Months 7-12)
+### Phase 3 (Months 4-6)
+- ⏳ 500+ knowledge entries
+- ⏳ 30+ cultures
+- ⏳ Mobile app (iOS/Android)
+- ⏳ Blockchain-based contribution rewards
+- ⏳ Cultural expert verification system
+- ⏳ Multi-language support
+- ⏳ **Audio Processing**: Direct oral tradition recording and transcription
+- ⏳ **Image Recognition**: Analyze cultural symbols and artifacts
+- ⏳ **Multi-modal Reasoning**: Combine text, audio, visual knowledge
+
+### Phase 4 (Months 7-12)
 - ⏳ 1,000+ entries
 - ⏳ 50+ cultures
-- ⏳ CUDOS integration
-- ⏳ Token launch
-
-**Full roadmap**: See [FUTURE_VISION.md](FUTURE_VISION.md)
+- ⏳ Full CUDOS network deployment
+- ⏳ Token launch for governance
+- ⏳ DAO for community governance
+- ⏳ AI-generated cultural art
+- ⏳ Elder interview mode
 
 ---
 
@@ -356,10 +548,9 @@ See [LICENSE](LICENSE) for details.
 
 ## 📞 Contact
 
-- **Email**: [team@oriki.ai]
-- **Twitter**: [@oriki_ai]
-- **Discord**: [Community Link]
-- **Website**: [oriki.ai]
+- **Email**: [kamalaliyu212@gmail.com]
+- **Twitter**: [@kaftandev]
+- **Website**: [oriki.vercel.app]
 
 ---
 
@@ -369,6 +560,6 @@ See [LICENSE](LICENSE) for details.
 
 *Built with ❤️ for BGI25 Hackathon*
 
-[⭐ Star this repo](https://github.com/your-repo) | [🐛 Report Bug](https://github.com/your-repo/issues) | [💡 Request Feature](https://github.com/your-repo/issues)
+[⭐ Star this repo](https://github.com/Alkamal01/Oriki) | [🐛 Report Bug](https://github.com/Alkamal01/Oriki/issues) | [💡 Request Feature](https://github.com/Alkamal01/Oriki/issues)
 
 </div>

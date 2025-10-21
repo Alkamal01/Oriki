@@ -429,7 +429,7 @@ export default function LandingPage() {
                 Try Demo Now
               </Link>
               <a
-                href="https://github.com/your-repo"
+                href="https://github.com/Alkamal01/Oriki"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="border-2 border-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all"
