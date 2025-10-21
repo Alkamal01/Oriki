@@ -5,11 +5,12 @@ services:
     region: oregon
     plan: free
     branch: main
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
+        value: 3.9.18
       - key: DATABASE_URL
         sync: false
       - key: ASI_API_KEY
@@ -26,3 +27,5 @@ services:
         sync: false
       - key: IPFS_API_URL
         value: /ip4/127.0.0.1/tcp/5001
+      - key: USE_FETCHAI
+        value: true

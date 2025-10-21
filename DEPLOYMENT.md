@@ -36,10 +36,12 @@ git push origin main
    - **Name**: `oriki-backend`
    - **Region**: Choose closest to your users
    - **Branch**: `main`
-   - **Root Directory**: `backend`
+   - **Root Directory**: `backend` (IMPORTANT!)
    - **Runtime**: `Python 3`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   
+   **⚠️ CRITICAL**: Make sure to set **Root Directory** to `backend` in Render settings!
 
 ### Step 3: Add Environment Variables
 
