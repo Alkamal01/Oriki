@@ -14,7 +14,4 @@ uagents
 cosmpy
 pillow
 python-magic
-whisper
-torch
-torchvision
 tavily-python
