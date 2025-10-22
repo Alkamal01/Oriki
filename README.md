@@ -291,11 +291,11 @@ docker-compose up --build
 ```
 ┌─────────────────────────────────────────────────────┐
 │              Frontend (Next.js + Tailwind)          │
-│  • Query Interface  • Upload Form  • Explorer      │
+│  • Query Interface  • Upload Form  • Explorer       │
 └────────────────────┬────────────────────────────────┘
                      │
-┌────────────────────▼────────────────────────────────┐
-│              Backend API (FastAPI)                  │
+┌────────────────────▼───────────────────────────────┐
+│              Backend API (FastAPI)                 │
 │  • REST endpoints  • WebSocket  • Validation       │
 └─────┬──────────┬──────────┬──────────┬─────────────┘
       │          │          │          │
@@ -309,9 +309,9 @@ docker-compose up --build
                      │
 ┌────────────────────▼────────────────────────────────┐
 │           Storage Layer                             │
-│  • PostgreSQL (metadata)                           │
-│  • IPFS (documents)                                │
-│  • CUDOS (compute)                                 │
+│  • PostgreSQL (metadata)                            │
+│  • IPFS (documents)                                 │
+│  • CUDOS (compute)                                  │
 └─────────────────────────────────────────────────────┘
 ```
 
